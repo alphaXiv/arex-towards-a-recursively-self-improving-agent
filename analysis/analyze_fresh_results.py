@@ -114,7 +114,7 @@ def paired_test(a, b, field):
     effect, ci = cluster_bootstrap(a, b, field)
     out["effect"] = effect
     out["cluster_bootstrap_95ci"] = ci
-    if field == "correct":
+    if field in {"correct", "em"}:
         wins = sum(not bool(ka[k][field]) and bool(kb[k][field]) for k in keys)
         losses = sum(bool(ka[k][field]) and not bool(kb[k][field]) for k in keys)
         out.update({"discordant_wins": wins, "discordant_losses": losses, "mcnemar_exact_p": exact_mcnemar(wins, losses)})

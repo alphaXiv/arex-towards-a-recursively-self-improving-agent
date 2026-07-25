@@ -103,7 +103,7 @@ class Scaffold:
         self.system = build_system_prompt(cfg)
         self.thinking_kwarg_ok = True
 
-    async def chat(self, messages, seed, max_tokens, stats):
+    async def chat(self, messages, seed, max_tokens, stats, budget):
         kwargs = dict(
             model=self.cfg["model"],
             messages=messages,
@@ -126,6 +126,7 @@ class Scaffold:
                 raise
         u = resp.usage
         stats["completion_tokens"] = stats.get("completion_tokens", 0) + (u.completion_tokens or 0)
+        budget.completion_used += u.completion_tokens or 0
         stats["ctx_max"] = max(stats.get("ctx_max", 0), u.prompt_tokens or 0)
         return resp.choices[0].message.content or "", u
 
@@ -176,16 +177,16 @@ class Scaffold:
             if est_tokens(messages) > cfg["ctx_soft_limit_tokens"]:
                 stats["truncations"] = stats.get("truncations", 0) + self.truncate_oldest(messages)
             if budget.completion_used >= budget.completion_budget:
-                return await self.force_finish(messages, seed, stats, transcript, "token_budget")
+                return await self.force_finish(messages, seed, stats, transcript, budget, "token_budget")
             try:
-                text, u = await self.chat(messages, seed + step, cfg["step_max_tokens"], stats)
+                text, u = await self.chat(messages, seed + step, cfg["step_max_tokens"], stats, budget)
             except Exception as e:
                 if "maximum context length" in str(e) or "context length" in str(e):
                     stats["truncations"] = stats.get("truncations", 0) + self.truncate_oldest(messages)
                     try:
-                        text, u = await self.chat(messages, seed + step, cfg["step_max_tokens"], stats)
+                        text, u = await self.chat(messages, seed + step, cfg["step_max_tokens"], stats, budget)
                     except Exception:
-                        return await self.force_finish(messages, seed, stats, transcript, "ctx_overflow")
+                        return await self.force_finish(messages, seed, stats, transcript, budget, "ctx_overflow")
                 else:
                     raise
             transcript.append({"role": "assistant", "content": text})
@@ -196,7 +197,7 @@ class Scaffold:
                 parse_fails += 1
                 stats["parse_fails"] = stats.get("parse_fails", 0) + 1
                 if parse_fails > 4:
-                    return await self.force_finish(messages, seed, stats, transcript, "parse_fails")
+                    return await self.force_finish(messages, seed, stats, transcript, budget, "parse_fails")
                 reply = ("Could not parse a tool call. End your message with exactly one "
                          "JSON object in a ```json fenced block, e.g. "
                          '{"tool": "search", "args": {"query": "..."}}.')
@@ -263,9 +264,9 @@ class Scaffold:
 
             transcript.append({"role": "tool", "content": reply[:2000]})
             messages.append({"role": "user", "content": reply})
-        return await self.force_finish(messages, seed, stats, transcript, "max_steps")
+        return await self.force_finish(messages, seed, stats, transcript, budget, "max_steps")
 
-    async def force_finish(self, messages, seed, stats, transcript, reason):
+    async def force_finish(self, messages, seed, stats, transcript, budget, reason):
         stats["forced_finish"] = reason
         messages = messages[:1] + messages[1:]  # keep as-is; append final demand
         messages.append({"role": "user", "content":
@@ -276,7 +277,7 @@ class Scaffold:
             self.truncate_oldest(messages)
         for attempt in range(2):
             try:
-                text, _ = await self.chat(messages, seed + 900 + attempt, 600, stats)
+                text, _ = await self.chat(messages, seed + 900 + attempt, 600, stats, budget)
             except Exception:
                 break
             transcript.append({"role": "assistant", "content": text})
@@ -299,7 +300,7 @@ class Scaffold:
 
     # ---------- outer audit loop ----------
 
-    async def audit(self, question, result, seed, stats, transcript):
+    async def audit(self, question, result, seed, stats, transcript, budget):
         cfg = self.cfg
         ev_lines = []
         for d in result["evidence_docids"][:8]:
@@ -329,7 +330,7 @@ Reply with exactly one JSON object in a ```json block:
         messages = [{"role": "user", "content": prompt}]
         for attempt in range(2):
             try:
-                text, _ = await self.chat(messages, seed + 7000 + attempt, 1500, stats)
+                text, _ = await self.chat(messages, seed + 7000 + attempt, 1500, stats, budget)
             except Exception:
                 break
             transcript.append({"role": "audit", "content": text})
@@ -371,7 +372,7 @@ Reply with exactly one JSON object in a ```json block:
                 rounds.append(rec)
                 break
             audit = await self.audit(question, result,
-                                     seed * 100000 + rnd * 1000, stats, transcript)
+                                     seed * 100000 + rnd * 1000, stats, transcript, budget)
             verdicts = [str(c.get("verdict", "")).upper() for c in audit.get("constraints", [])]
             n_sup = sum(v == "SUPPORTED" for v in verdicts)
             all_sup = len(verdicts) > 0 and n_sup == len(verdicts)
