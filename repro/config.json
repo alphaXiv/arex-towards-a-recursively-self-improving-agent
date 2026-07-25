@@ -1,0 +1,31 @@
+{
+  "cell": "full",
+  "acu": true,
+  "outer": true,
+  "n_queries": 530,
+  "seeds": [
+    0,
+    1
+  ],
+  "query_sample_seed": 0,
+  "tool_budget": 32,
+  "completion_budget": 60000,
+  "max_rounds": 3,
+  "confidence_tau": 90,
+  "max_model_len": 24576,
+  "ctx_soft_limit_tokens": 19500,
+  "acu_trigger_tokens": 15000,
+  "step_max_tokens": 2000,
+  "max_steps_per_round": 40,
+  "temperature": 0.7,
+  "top_p": 0.8,
+  "model": "Qwen/Qwen3.5-4B",
+  "concurrency_per_server": 8,
+  "task_timeout_s": 2700,
+  "open_doc_chars": 12000,
+  "snippet_chars": 400,
+  "search_topk": 10,
+  "audit_excerpt_chars": 1200,
+  "smoke": false,
+  "exclude_n": 300
+}
