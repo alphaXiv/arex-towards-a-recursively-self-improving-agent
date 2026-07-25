@@ -4,8 +4,7 @@
   "outer": true,
   "n_queries": 530,
   "seeds": [
-    0,
-    1
+    2
   ],
   "query_sample_seed": 0,
   "tool_budget": 32,
