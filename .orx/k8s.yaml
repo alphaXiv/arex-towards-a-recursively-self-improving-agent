@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: arex-{{ORX_RUN}}
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: run
+          image: vllm/vllm-openai:latest
+          command:
+            - bash
+            - -c
+            - |
+              (command -v git || (apt-get update -qq && apt-get install -y -qq git)) >/dev/null 2>&1
+              bash -c "$ORX_SCRIPT"
+          env:
+            - name: HF_HOME
+              value: /work/hf
+          resources:
+            requests:
+              nvidia.com/gpu: "1"
+              cpu: "24"
+              memory: "160Gi"
+            limits:
+              nvidia.com/gpu: "1"
+          volumeMounts:
+            - name: work
+              mountPath: /work
+            - name: shm
+              mountPath: /dev/shm
+      volumes:
+        - name: work
+          emptyDir:
+            sizeLimit: 300Gi
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 32Gi
