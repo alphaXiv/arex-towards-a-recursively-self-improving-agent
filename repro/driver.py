@@ -23,7 +23,12 @@ def load_tasks(workdir, cfg):
     tasks = [json.loads(l) for l in open(f"{workdir}/tasks.jsonl")]
     tasks.sort(key=lambda t: int(t["query_id"]))
     rng = random.Random(cfg["query_sample_seed"])
-    sample = rng.sample(tasks, cfg["n_queries"]) if cfg["n_queries"] < len(tasks) else tasks
+    if cfg.get("exclude_n"):
+        excluded = {t["query_id"] for t in rng.sample(tasks, cfg["exclude_n"])}
+        tasks = [t for t in tasks if t["query_id"] not in excluded]
+    rng2 = random.Random(cfg["query_sample_seed"] + 1)
+    sample = rng2.sample(tasks, cfg["n_queries"]) if cfg["n_queries"] < len(tasks) else tasks
+    print("QIDS " + __import__("json").dumps(sorted(int(t["query_id"]) for t in sample)), flush=True)
     return sample
 
 
