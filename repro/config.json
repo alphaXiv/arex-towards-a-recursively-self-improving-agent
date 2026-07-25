@@ -2,7 +2,7 @@
   "cell": "full",
   "acu": true,
   "outer": true,
-  "n_queries": 300,
+  "n_queries": 530,
   "seeds": [
     0,
     1
@@ -26,5 +26,6 @@
   "snippet_chars": 400,
   "search_topk": 10,
   "audit_excerpt_chars": 1200,
-  "smoke": false
+  "smoke": false,
+  "exclude_n": 300
 }
