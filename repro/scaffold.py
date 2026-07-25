@@ -170,7 +170,7 @@ class Scaffold:
             {"role": "user", "content": head},
         ]
         parse_fails = 0
-        nudged = False
+        demand_pending = 0  # tool calls since an unmet update_context demand
         for step in range(cfg["max_steps_per_round"]):
             # fixed-context fallback (all cells): truncate before overflow
             if est_tokens(messages) > cfg["ctx_soft_limit_tokens"]:
@@ -219,6 +219,7 @@ class Scaffold:
                     before = est_tokens(messages)
                     messages = self.apply_update_context(messages, state, question, objective)
                     after = est_tokens(messages)
+                    demand_pending = 0
                     stats["updates"] = stats.get("updates", 0) + 1
                     stats.setdefault("update_sizes", []).append([before, after])
                     transcript.append({"role": "acu", "content": f"context {before}->{after} est.tokens"})
@@ -237,11 +238,25 @@ class Scaffold:
                         out = self.engine.open(str(args.get("docid", "")))
                     reply = (f"Tool result ({budget.tool_calls_left} search/open calls "
                              f"remaining):\n{out}")
-                    if (cfg["acu"] and not nudged
-                            and est_tokens(messages) > cfg["acu_nudge_tokens"]):
-                        nudged = True
-                        reply += ("\n\n[note: your context is growing large; consider "
-                                  "calling update_context to compress it before continuing]")
+                    if cfg["acu"]:
+                        est = est_tokens(messages) + len(reply) // 3
+                        if est > cfg["acu_trigger_tokens"]:
+                            if demand_pending == 0:
+                                demand_pending = 1
+                                reply += (
+                                    "\n\n[CONTEXT ALERT: your interaction history is close to "
+                                    "the context limit. You MUST call update_context NOW, "
+                                    "before any further search/open calls. Save every verified "
+                                    "finding WITH its docids, current and rejected candidates, "
+                                    "unresolved constraints, and your next steps — anything not "
+                                    "saved will be lost.]")
+                            else:
+                                demand_pending += 1
+                                if demand_pending > 3:
+                                    stats["acu_refusals"] = stats.get("acu_refusals", 0) + 1
+                                    stats["truncations"] = stats.get("truncations", 0) + \
+                                        self.truncate_oldest(messages)
+                                    demand_pending = 0
             else:
                 reply = f"Unknown tool '{tool}'. Available: search, open, finish" + (
                     ", update_context." if cfg["acu"] else ".")
@@ -396,6 +411,7 @@ Reply with exactly one JSON object in a ```json block:
             "rounds_used": len(rounds),
             "tool_calls_used": cfg["tool_budget"] - budget.tool_calls_left,
             "updates": stats.get("updates", 0),
+            "acu_refusals": stats.get("acu_refusals", 0),
             "truncations": stats.get("truncations", 0),
             "parse_fails": stats.get("parse_fails", 0),
             "forced_finish": stats.get("forced_finish"),

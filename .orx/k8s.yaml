@@ -21,11 +21,11 @@ spec:
               value: /work/hf
           resources:
             requests:
-              nvidia.com/gpu: "1"
-              cpu: "24"
-              memory: "160Gi"
+              nvidia.com/gpu: "4"
+              cpu: "48"
+              memory: "320Gi"
             limits:
-              nvidia.com/gpu: "1"
+              nvidia.com/gpu: "4"
           volumeMounts:
             - name: work
               mountPath: /work
