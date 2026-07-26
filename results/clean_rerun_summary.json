@@ -1,0 +1,306 @@
+{
+  "paper": {
+    "paper_id": "2607.21461",
+    "browsecomp_accuracy": {
+      "base": 0.596,
+      "acu": 0.714,
+      "outer": 0.698,
+      "full": 0.825
+    },
+    "reported_context_update_gain_pp": 11.8,
+    "reported_outer_audit_gain_over_acu_pp": 11.1
+  },
+  "design": {
+    "benchmark": "BrowseComp-Plus",
+    "query_subset": "530-query held-out complement of a fixed 300-query setup sample",
+    "n_queries": 530,
+    "seeds": [
+      0,
+      1
+    ],
+    "n_paired_tasks": 1060,
+    "model": "Qwen/Qwen3.5-4B",
+    "corpus_documents": 100195,
+    "backend": "Kubernetes",
+    "gpu_model": "NVIDIA RTX PRO 6000 Blackwell",
+    "peak_concurrent_gpu_count": 16
+  },
+  "cells": {
+    "base": {
+      "aggregate": {
+        "cell": "base",
+        "n_tasks": 1060,
+        "n_queries": 530,
+        "seeds": [
+          0,
+          1
+        ],
+        "acc_contain": 0.2726,
+        "acc_em": 0.2594,
+        "ev_recall_gold": 0.2037,
+        "ev_recall_evd": 0.1443,
+        "mean_tool_calls": 19.9292,
+        "mean_updates": 0.0,
+        "mean_truncations": 14.6764,
+        "mean_rounds": 1.0,
+        "mean_completion_tokens": 6564.8396,
+        "mean_ctx_max": 13950.1481,
+        "mean_wall_s": 131.0604,
+        "forced_finish_rate": 0.1321,
+        "error_rate": 0.0,
+        "by_seed": {
+          "0": {
+            "acc_contain": 0.2547,
+            "acc_em": 0.2415,
+            "ev_recall_gold": 0.1938
+          },
+          "1": {
+            "acc_contain": 0.2906,
+            "acc_em": 0.2774,
+            "ev_recall_gold": 0.2137
+          }
+        },
+        "total_wall_s": 4533.4
+      },
+      "guarded_answer_cluster_bootstrap_95ci": [
+        0.23962264150943396,
+        0.30566037735849055
+      ],
+      "exact_match_cluster_bootstrap_95ci": [
+        0.22735849056603774,
+        0.29245283018867924
+      ],
+      "record_count": 1060
+    },
+    "acu": {
+      "aggregate": {
+        "cell": "acu",
+        "n_tasks": 1060,
+        "n_queries": 530,
+        "seeds": [
+          0,
+          1
+        ],
+        "acc_contain": 0.3255,
+        "acc_em": 0.3094,
+        "ev_recall_gold": 0.2638,
+        "ev_recall_evd": 0.1805,
+        "mean_tool_calls": 18.6198,
+        "mean_updates": 1.017,
+        "mean_truncations": 4.8283,
+        "mean_rounds": 1.0,
+        "mean_completion_tokens": 5772.7349,
+        "mean_ctx_max": 13067.0292,
+        "mean_wall_s": 103.4014,
+        "forced_finish_rate": 0.3406,
+        "error_rate": 0.0,
+        "by_seed": {
+          "0": {
+            "acc_contain": 0.3189,
+            "acc_em": 0.3038,
+            "ev_recall_gold": 0.2595
+          },
+          "1": {
+            "acc_contain": 0.3321,
+            "acc_em": 0.3151,
+            "ev_recall_gold": 0.2682
+          }
+        },
+        "total_wall_s": 3583.9
+      },
+      "guarded_answer_cluster_bootstrap_95ci": [
+        0.29056603773584905,
+        0.3613207547169811
+      ],
+      "exact_match_cluster_bootstrap_95ci": [
+        0.27547169811320754,
+        0.3443396226415094
+      ],
+      "record_count": 1060
+    },
+    "outer": {
+      "aggregate": {
+        "cell": "outer",
+        "n_tasks": 1060,
+        "n_queries": 530,
+        "seeds": [
+          0,
+          1
+        ],
+        "acc_contain": 0.3085,
+        "acc_em": 0.2934,
+        "ev_recall_gold": 0.2436,
+        "ev_recall_evd": 0.1748,
+        "mean_tool_calls": 27.1519,
+        "mean_updates": 0.0,
+        "mean_truncations": 16.9528,
+        "mean_rounds": 1.9858,
+        "mean_completion_tokens": 10481.017,
+        "mean_ctx_max": 14928.5745,
+        "mean_wall_s": 189.3261,
+        "forced_finish_rate": 0.1915,
+        "error_rate": 0.0,
+        "by_seed": {
+          "0": {
+            "acc_contain": 0.3057,
+            "acc_em": 0.2906,
+            "ev_recall_gold": 0.2409
+          },
+          "1": {
+            "acc_contain": 0.3113,
+            "acc_em": 0.2962,
+            "ev_recall_gold": 0.2462
+          }
+        },
+        "total_wall_s": 6604.1
+      },
+      "guarded_answer_cluster_bootstrap_95ci": [
+        0.27264150943396226,
+        0.3452830188679245
+      ],
+      "exact_match_cluster_bootstrap_95ci": [
+        0.25849056603773585,
+        0.3292452830188679
+      ],
+      "record_count": 1060
+    },
+    "full": {
+      "aggregate": {
+        "cell": "full",
+        "n_tasks": 1060,
+        "n_queries": 530,
+        "seeds": [
+          0,
+          1
+        ],
+        "acc_contain": 0.3528,
+        "acc_em": 0.3349,
+        "ev_recall_gold": 0.2994,
+        "ev_recall_evd": 0.2211,
+        "mean_tool_calls": 27.2792,
+        "mean_updates": 1.3358,
+        "mean_truncations": 6.1462,
+        "mean_rounds": 2.1717,
+        "mean_completion_tokens": 10081.7132,
+        "mean_ctx_max": 13924.4547,
+        "mean_wall_s": 164.9545,
+        "forced_finish_rate": 0.3755,
+        "error_rate": 0.0,
+        "by_seed": {
+          "0": {
+            "acc_contain": 0.3396,
+            "acc_em": 0.317,
+            "ev_recall_gold": 0.2859
+          },
+          "1": {
+            "acc_contain": 0.366,
+            "acc_em": 0.3528,
+            "ev_recall_gold": 0.3129
+          }
+        },
+        "total_wall_s": 5723.5
+      },
+      "guarded_answer_cluster_bootstrap_95ci": [
+        0.3169811320754717,
+        0.389622641509434
+      ],
+      "exact_match_cluster_bootstrap_95ci": [
+        0.3,
+        0.37169811320754714
+      ],
+      "record_count": 1060
+    }
+  },
+  "claims": {
+    "context_update": {
+      "comparison": "acu - base",
+      "exact_match": {
+        "n_pairs": 1060,
+        "effect": 0.05,
+        "cluster_bootstrap_95ci": [
+          0.02358490566037736,
+          0.07735849056603773
+        ],
+        "discordant_wins": 129,
+        "discordant_losses": 76,
+        "mcnemar_exact_p": 0.00026196962599604225
+      },
+      "guarded_answer": {
+        "n_pairs": 1060,
+        "effect": 0.052830188679245285,
+        "cluster_bootstrap_95ci": [
+          0.026415094339622643,
+          0.07924528301886792
+        ],
+        "discordant_wins": 129,
+        "discordant_losses": 73,
+        "mcnemar_exact_p": 9.912782420372812e-05
+      },
+      "evidence_retention": {
+        "n_pairs": 1060,
+        "effect": 0.06012166816412099,
+        "cluster_bootstrap_95ci": [
+          0.03784023098233004,
+          0.08261951557352498
+        ]
+      }
+    },
+    "outer_audit": {
+      "comparison": "full - acu",
+      "exact_match": {
+        "n_pairs": 1060,
+        "effect": 0.02547169811320755,
+        "cluster_bootstrap_95ci": [
+          0.0009433962264150943,
+          0.05
+        ],
+        "discordant_wins": 107,
+        "discordant_losses": 80,
+        "mcnemar_exact_p": 0.05697078139259501
+      },
+      "guarded_answer": {
+        "n_pairs": 1060,
+        "effect": 0.027358490566037737,
+        "cluster_bootstrap_95ci": [
+          0.0037735849056603774,
+          0.0509433962264151
+        ],
+        "discordant_wins": 104,
+        "discordant_losses": 75,
+        "mcnemar_exact_p": 0.03607016096096306
+      },
+      "evidence_retention": {
+        "n_pairs": 1060,
+        "effect": 0.03554207846660677,
+        "cluster_bootstrap_95ci": [
+          0.01639336253369272,
+          0.055041236148547466
+        ]
+      }
+    }
+  },
+  "factorial_controls": {
+    "audit_only_vs_base_exact_match": {
+      "n_pairs": 1060,
+      "effect": 0.033962264150943396,
+      "cluster_bootstrap_95ci": [
+        0.010377358490566037,
+        0.05849056603773585
+      ],
+      "discordant_wins": 97,
+      "discordant_losses": 61,
+      "mcnemar_exact_p": 0.005197322839582243
+    },
+    "full_vs_audit_only_exact_match": {
+      "n_pairs": 1060,
+      "effect": 0.04150943396226415,
+      "cluster_bootstrap_95ci": [
+        0.016981132075471698,
+        0.0660377358490566
+      ],
+      "discordant_wins": 110,
+      "discordant_losses": 66,
+      "mcnemar_exact_p": 0.00112931791137213
+    }
+  }
+}
