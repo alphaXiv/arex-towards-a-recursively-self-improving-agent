@@ -23,7 +23,8 @@
     "corpus_documents": 100195,
     "backend": "Kubernetes",
     "gpu_model": "NVIDIA RTX PRO 6000 Blackwell",
-    "peak_concurrent_gpu_count": 16
+    "peak_concurrent_gpu_count": 16,
+    "campaign_wall_hours": 5.29
   },
   "cells": {
     "base": {
@@ -301,6 +302,309 @@
       "discordant_wins": 110,
       "discordant_losses": 66,
       "mcnemar_exact_p": 0.00112931791137213
+    }
+  },
+  "robustness": {
+    "2": {
+      "cells": {
+        "base": {
+          "aggregate": {
+            "cell": "base",
+            "n_tasks": 530,
+            "n_queries": 530,
+            "seeds": [
+              2
+            ],
+            "acc_contain": 0.2642,
+            "acc_em": 0.2434,
+            "ev_recall_gold": 0.1879,
+            "ev_recall_evd": 0.1318,
+            "mean_tool_calls": 19.7189,
+            "mean_updates": 0.0,
+            "mean_truncations": 14.0981,
+            "mean_rounds": 1.0,
+            "mean_completion_tokens": 6154.8887,
+            "mean_ctx_max": 13890.0604,
+            "mean_wall_s": 126.2585,
+            "forced_finish_rate": 0.1509,
+            "error_rate": 0.0,
+            "by_seed": {
+              "2": {
+                "acc_contain": 0.2642,
+                "acc_em": 0.2434,
+                "ev_recall_gold": 0.1879
+              }
+            },
+            "total_wall_s": 2307.1
+          },
+          "record_count": 530
+        },
+        "acu": {
+          "aggregate": {
+            "cell": "acu",
+            "n_tasks": 530,
+            "n_queries": 530,
+            "seeds": [
+              2
+            ],
+            "acc_contain": 0.3189,
+            "acc_em": 0.3038,
+            "ev_recall_gold": 0.247,
+            "ev_recall_evd": 0.1758,
+            "mean_tool_calls": 19.5019,
+            "mean_updates": 0.9981,
+            "mean_truncations": 5.4434,
+            "mean_rounds": 1.0,
+            "mean_completion_tokens": 5582.4887,
+            "mean_ctx_max": 13211.3434,
+            "mean_wall_s": 104.6221,
+            "forced_finish_rate": 0.3453,
+            "error_rate": 0.0,
+            "by_seed": {
+              "2": {
+                "acc_contain": 0.3189,
+                "acc_em": 0.3038,
+                "ev_recall_gold": 0.247
+              }
+            },
+            "total_wall_s": 1933.8
+          },
+          "record_count": 530
+        },
+        "outer": {
+          "aggregate": {
+            "cell": "outer",
+            "n_tasks": 530,
+            "n_queries": 530,
+            "seeds": [
+              2
+            ],
+            "acc_contain": 0.3094,
+            "acc_em": 0.2943,
+            "ev_recall_gold": 0.2439,
+            "ev_recall_evd": 0.1721,
+            "mean_tool_calls": 27.1962,
+            "mean_updates": 0.0,
+            "mean_truncations": 16.5057,
+            "mean_rounds": 1.9962,
+            "mean_completion_tokens": 9782.9038,
+            "mean_ctx_max": 14888.8981,
+            "mean_wall_s": 179.8485,
+            "forced_finish_rate": 0.1887,
+            "error_rate": 0.0,
+            "by_seed": {
+              "2": {
+                "acc_contain": 0.3094,
+                "acc_em": 0.2943,
+                "ev_recall_gold": 0.2439
+              }
+            },
+            "total_wall_s": 3164.6
+          },
+          "record_count": 530
+        },
+        "full": {
+          "aggregate": {
+            "cell": "full",
+            "n_tasks": 530,
+            "n_queries": 530,
+            "seeds": [
+              2
+            ],
+            "acc_contain": 0.3434,
+            "acc_em": 0.3226,
+            "ev_recall_gold": 0.2771,
+            "ev_recall_evd": 0.21,
+            "mean_tool_calls": 27.3792,
+            "mean_updates": 1.3792,
+            "mean_truncations": 6.4302,
+            "mean_rounds": 2.0604,
+            "mean_completion_tokens": 9589.7528,
+            "mean_ctx_max": 13876.2792,
+            "mean_wall_s": 159.8387,
+            "forced_finish_rate": 0.3472,
+            "error_rate": 0.0,
+            "by_seed": {
+              "2": {
+                "acc_contain": 0.3434,
+                "acc_em": 0.3226,
+                "ev_recall_gold": 0.2771
+              }
+            },
+            "total_wall_s": 2852.6
+          },
+          "record_count": 530
+        }
+      },
+      "claims": {
+        "context_update_exact_match": {
+          "n_pairs": 530,
+          "effect": 0.06037735849056604,
+          "cluster_bootstrap_95ci": [
+            0.024528301886792454,
+            0.09622641509433963
+          ],
+          "discordant_wins": 64,
+          "discordant_losses": 32,
+          "mcnemar_exact_p": 0.001424496094649118
+        },
+        "context_update_evidence": {
+          "n_pairs": 530,
+          "effect": 0.059116501946690624,
+          "cluster_bootstrap_95ci": [
+            0.027969246031746033,
+            0.09074517070979334
+          ]
+        },
+        "outer_audit_exact_match": {
+          "n_pairs": 530,
+          "effect": 0.018867924528301886,
+          "cluster_bootstrap_95ci": [
+            -0.013207547169811321,
+            0.0509433962264151
+          ],
+          "discordant_wins": 42,
+          "discordant_losses": 32,
+          "mcnemar_exact_p": 0.29541328065567013
+        }
+      }
+    }
+  },
+  "partial_robustness": {
+    "3": {
+      "missing_cells": [
+        "full"
+      ],
+      "cells": {
+        "base": {
+          "aggregate": {
+            "cell": "base",
+            "n_tasks": 530,
+            "n_queries": 530,
+            "seeds": [
+              3
+            ],
+            "acc_contain": 0.2717,
+            "acc_em": 0.2585,
+            "ev_recall_gold": 0.2069,
+            "ev_recall_evd": 0.1396,
+            "mean_tool_calls": 19.234,
+            "mean_updates": 0.0,
+            "mean_truncations": 13.6038,
+            "mean_rounds": 1.0,
+            "mean_completion_tokens": 6125.2057,
+            "mean_ctx_max": 13896.7906,
+            "mean_wall_s": 123.7738,
+            "forced_finish_rate": 0.1698,
+            "error_rate": 0.0,
+            "by_seed": {
+              "3": {
+                "acc_contain": 0.2717,
+                "acc_em": 0.2585,
+                "ev_recall_gold": 0.2069
+              }
+            },
+            "total_wall_s": 2243.5
+          },
+          "record_count": 530
+        },
+        "acu": {
+          "aggregate": {
+            "cell": "acu",
+            "n_tasks": 530,
+            "n_queries": 530,
+            "seeds": [
+              3
+            ],
+            "acc_contain": 0.3075,
+            "acc_em": 0.2925,
+            "ev_recall_gold": 0.254,
+            "ev_recall_evd": 0.1731,
+            "mean_tool_calls": 20.7528,
+            "mean_updates": 1.266,
+            "mean_truncations": 4.5849,
+            "mean_rounds": 1.0,
+            "mean_completion_tokens": 5321.7208,
+            "mean_ctx_max": 13128.5434,
+            "mean_wall_s": 102.0083,
+            "forced_finish_rate": 0.2792,
+            "error_rate": 0.0,
+            "by_seed": {
+              "3": {
+                "acc_contain": 0.3075,
+                "acc_em": 0.2925,
+                "ev_recall_gold": 0.254
+              }
+            },
+            "total_wall_s": 1837.6
+          },
+          "record_count": 530
+        },
+        "outer": {
+          "aggregate": {
+            "cell": "outer",
+            "n_tasks": 530,
+            "n_queries": 530,
+            "seeds": [
+              3
+            ],
+            "acc_contain": 0.3,
+            "acc_em": 0.2868,
+            "ev_recall_gold": 0.2495,
+            "ev_recall_evd": 0.1778,
+            "mean_tool_calls": 27.2038,
+            "mean_updates": 0.0,
+            "mean_truncations": 16.7962,
+            "mean_rounds": 1.9962,
+            "mean_completion_tokens": 9948.6377,
+            "mean_ctx_max": 14874.8151,
+            "mean_wall_s": 181.963,
+            "forced_finish_rate": 0.1774,
+            "error_rate": 0.0,
+            "by_seed": {
+              "3": {
+                "acc_contain": 0.3,
+                "acc_em": 0.2868,
+                "ev_recall_gold": 0.2495
+              }
+            },
+            "total_wall_s": 3321.0
+          },
+          "record_count": 530
+        }
+      },
+      "claims": {
+        "context_update_exact_match": {
+          "n_pairs": 530,
+          "effect": 0.033962264150943396,
+          "cluster_bootstrap_95ci": [
+            0.0018867924528301887,
+            0.0660377358490566
+          ],
+          "discordant_wins": 47,
+          "discordant_losses": 29,
+          "mcnemar_exact_p": 0.05045241024721763
+        },
+        "context_update_evidence": {
+          "n_pairs": 530,
+          "effect": 0.047095687331536386,
+          "cluster_bootstrap_95ci": [
+            0.018015610961365683,
+            0.07656261230907456
+          ]
+        },
+        "audit_only_vs_base_exact_match": {
+          "n_pairs": 530,
+          "effect": 0.02830188679245283,
+          "cluster_bootstrap_95ci": [
+            -0.0037735849056603774,
+            0.06037735849056604
+          ],
+          "discordant_wins": 45,
+          "discordant_losses": 30,
+          "mcnemar_exact_p": 0.10534226887460488
+        }
+      }
     }
   }
 }

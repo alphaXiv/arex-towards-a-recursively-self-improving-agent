@@ -203,11 +203,35 @@ def save_seed_robustness(summary, images_dir):
     ):
         vals = [robust["cells"][c]["aggregate"]["acc_em"] * 100 for c in CELLS]
         ax.plot(x, vals, marker=marker, lw=2, label=f"Seed {seed} (separate run)")
+    for seed, robust in sorted(
+        summary.get("partial_robustness", {}).items(),
+        key=lambda item: int(item[0]),
+    ):
+        vals = [
+            robust["cells"][c]["aggregate"]["acc_em"] * 100
+            if c in robust["cells"]
+            else np.nan
+            for c in CELLS
+        ]
+        ax.plot(
+            x,
+            vals,
+            marker="D",
+            lw=2,
+            linestyle="--",
+            label=f"Seed {seed} (partial; full cancelled)",
+        )
     ax.set_xticks(x, [LABELS[c] for c in CELLS])
     ax.set_ylabel("Strict normalized exact match (%)")
     ax.set_title("The scaffold ordering across independent sampling seeds")
     ax.grid(axis="y", alpha=0.2)
-    ax.legend(frameon=False)
+    ax.legend(
+        frameon=False,
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.17),
+        ncol=2,
+        fontsize=8,
+    )
     fig.tight_layout()
     fig.savefig(images_dir / "seed_robustness.png", bbox_inches="tight")
     plt.close(fig)
@@ -245,8 +269,16 @@ def main():
         default=[],
         help="Directory containing base/acu/outer/full logs for one extra seed; repeatable",
     )
+    ap.add_argument(
+        "--partial-robustness-dir",
+        type=Path,
+        action="append",
+        default=[],
+        help="Directory containing a matched subset of robustness cells; repeatable",
+    )
     ap.add_argument("--output-json", type=Path, required=True)
     ap.add_argument("--images-dir", type=Path, required=True)
+    ap.add_argument("--campaign-wall-hours", type=float, required=True)
     args = ap.parse_args()
 
     records, aggregates = {}, {}
@@ -275,6 +307,7 @@ def main():
             "backend": "Kubernetes",
             "gpu_model": "NVIDIA RTX PRO 6000 Blackwell",
             "peak_concurrent_gpu_count": 16,
+            "campaign_wall_hours": args.campaign_wall_hours,
         },
         "cells": {},
         "claims": {},
@@ -347,6 +380,58 @@ def main():
                         robust_records["acu"], robust_records["full"], "em"
                     ),
                 }
+            }
+    if args.partial_robustness_dir:
+        summary["partial_robustness"] = {}
+        for robust_dir in args.partial_robustness_dir:
+            present = [cell for cell in CELLS if (robust_dir / f"{cell}.log").exists()]
+            if not {"base", "acu"}.issubset(present):
+                raise RuntimeError(
+                    f"{robust_dir} partial robustness requires at least base and acu"
+                )
+            partial_records, partial_aggregates = {}, {}
+            for cell in present:
+                partial_records[cell], partial_aggregates[cell] = read_log(
+                    robust_dir / f"{cell}.log"
+                )
+            partial_keys = [
+                {(int(r["qid"]), int(r["seed"])) for r in partial_records[cell]}
+                for cell in present
+            ]
+            if any(k != partial_keys[0] for k in partial_keys[1:]):
+                raise RuntimeError(
+                    f"{robust_dir} partial cells did not evaluate identical pairs"
+                )
+            seeds = {int(r["seed"]) for r in partial_records["base"]}
+            if len(seeds) != 1:
+                raise RuntimeError(
+                    f"{robust_dir} must contain exactly one independent seed"
+                )
+            seed = str(next(iter(seeds)))
+            claims = {
+                "context_update_exact_match": paired_test(
+                    partial_records["base"], partial_records["acu"], "em"
+                ),
+                "context_update_evidence": paired_test(
+                    partial_records["base"],
+                    partial_records["acu"],
+                    "ev_recall_gold",
+                ),
+            }
+            if "outer" in present:
+                claims["audit_only_vs_base_exact_match"] = paired_test(
+                    partial_records["base"], partial_records["outer"], "em"
+                )
+            summary["partial_robustness"][seed] = {
+                "missing_cells": [cell for cell in CELLS if cell not in present],
+                "cells": {
+                    cell: {
+                        "aggregate": partial_aggregates[cell],
+                        "record_count": len(partial_records[cell]),
+                    }
+                    for cell in present
+                },
+                "claims": claims,
             }
 
     args.output_json.parent.mkdir(parents=True, exist_ok=True)
