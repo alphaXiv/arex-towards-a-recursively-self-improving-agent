@@ -196,12 +196,13 @@ def save_seed_robustness(summary, images_dir):
     for seed, marker in [("0", "o"), ("1", "s")]:
         vals = [summary["cells"][c]["aggregate"]["by_seed"][seed]["acc_em"] * 100 for c in CELLS]
         ax.plot(x, vals, marker=marker, lw=2, label=f"Seed {seed}")
-    if "robustness_seed2" in summary:
-        vals = [
-            summary["robustness_seed2"]["cells"][c]["aggregate"]["acc_em"] * 100
-            for c in CELLS
-        ]
-        ax.plot(x, vals, marker="^", lw=2, label="Seed 2 (separate run)")
+    markers = ["^", "D", "v", "P"]
+    for (seed, robust), marker in zip(
+        sorted(summary.get("robustness", {}).items(), key=lambda item: int(item[0])),
+        markers,
+    ):
+        vals = [robust["cells"][c]["aggregate"]["acc_em"] * 100 for c in CELLS]
+        ax.plot(x, vals, marker=marker, lw=2, label=f"Seed {seed} (separate run)")
     ax.set_xticks(x, [LABELS[c] for c in CELLS])
     ax.set_ylabel("Strict normalized exact match (%)")
     ax.set_title("The scaffold ordering across independent sampling seeds")
@@ -237,7 +238,13 @@ def save_mechanism(summary, images_dir):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--logs-dir", type=Path, required=True)
-    ap.add_argument("--robustness-dir", type=Path)
+    ap.add_argument(
+        "--robustness-dir",
+        type=Path,
+        action="append",
+        default=[],
+        help="Directory containing base/acu/outer/full logs for one extra seed; repeatable",
+    )
     ap.add_argument("--output-json", type=Path, required=True)
     ap.add_argument("--images-dir", type=Path, required=True)
     args = ap.parse_args()
@@ -296,38 +303,51 @@ def main():
         "full_vs_audit_only_exact_match": paired_test(records["outer"], records["full"], "em"),
     }
     if args.robustness_dir:
-        robust_records, robust_aggregates = {}, {}
-        for cell in CELLS:
-            robust_records[cell], robust_aggregates[cell] = read_log(
-                args.robustness_dir / f"{cell}.log"
-            )
-        robust_keys = [
-            {(int(r["qid"]), int(r["seed"])) for r in robust_records[c]} for c in CELLS
-        ]
-        if any(k != robust_keys[0] for k in robust_keys[1:]):
-            raise RuntimeError("Seed-2 cells did not evaluate identical query-seed pairs")
-        if {int(r["seed"]) for r in robust_records["base"]} != {2}:
-            raise RuntimeError("Robustness directory must contain only seed 2")
-        summary["robustness_seed2"] = {
-            "cells": {
-                cell: {
-                    "aggregate": robust_aggregates[cell],
-                    "record_count": len(robust_records[cell]),
+        summary["robustness"] = {}
+        for robust_dir in args.robustness_dir:
+            robust_records, robust_aggregates = {}, {}
+            for cell in CELLS:
+                robust_records[cell], robust_aggregates[cell] = read_log(
+                    robust_dir / f"{cell}.log"
+                )
+            robust_keys = [
+                {(int(r["qid"]), int(r["seed"])) for r in robust_records[c]}
+                for c in CELLS
+            ]
+            if any(k != robust_keys[0] for k in robust_keys[1:]):
+                raise RuntimeError(
+                    f"{robust_dir} cells did not evaluate identical query-seed pairs"
+                )
+            seeds = {int(r["seed"]) for r in robust_records["base"]}
+            if len(seeds) != 1:
+                raise RuntimeError(
+                    f"{robust_dir} must contain exactly one independent seed"
+                )
+            seed = str(next(iter(seeds)))
+            if seed in summary["robustness"]:
+                raise RuntimeError(f"Duplicate robustness seed {seed}")
+            summary["robustness"][seed] = {
+                "cells": {
+                    cell: {
+                        "aggregate": robust_aggregates[cell],
+                        "record_count": len(robust_records[cell]),
+                    }
+                    for cell in CELLS
+                },
+                "claims": {
+                    "context_update_exact_match": paired_test(
+                        robust_records["base"], robust_records["acu"], "em"
+                    ),
+                    "context_update_evidence": paired_test(
+                        robust_records["base"],
+                        robust_records["acu"],
+                        "ev_recall_gold",
+                    ),
+                    "outer_audit_exact_match": paired_test(
+                        robust_records["acu"], robust_records["full"], "em"
+                    ),
                 }
-                for cell in CELLS
-            },
-            "claims": {
-                "context_update_exact_match": paired_test(
-                    robust_records["base"], robust_records["acu"], "em"
-                ),
-                "context_update_evidence": paired_test(
-                    robust_records["base"], robust_records["acu"], "ev_recall_gold"
-                ),
-                "outer_audit_exact_match": paired_test(
-                    robust_records["acu"], robust_records["full"], "em"
-                ),
-            },
-        }
+            }
 
     args.output_json.parent.mkdir(parents=True, exist_ok=True)
     args.images_dir.mkdir(parents=True, exist_ok=True)
